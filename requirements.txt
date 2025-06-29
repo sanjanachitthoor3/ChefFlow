@@ -1,0 +1,10 @@
+pathway
+langchain
+beautifulsoup4
+requests
+streamlit
+tiktoken
+openai-whisper
+pyttsx3
+python-dotenv
+deepseek
