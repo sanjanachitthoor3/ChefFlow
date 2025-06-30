@@ -88,4 +88,71 @@ if mode == "Text Chat":
 #-------------------------------------VOICE MODE------------------------
 elif mode == "Voice Chat":
     st.subheader("🎤 Voice Chat Assistant")
-    st.info("Voice chat functionality is coming soon! You'll be able to speak to ChefFlow here.")
+
+    # --- Session state setup
+    if "assistant" not in st.session_state:
+        st.session_state.assistant = None
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if "last_voice_input" not in st.session_state:
+        st.session_state.last_voice_input = None
+
+    st.sidebar.header("Paste Recipe Link")
+    url_input = st.sidebar.text_input("Enter a recipe URL:")
+
+    if st.sidebar.button("Fetch Recipe"):
+        if url_input:
+            recipe_data = scrape_website(url_input)
+            if recipe_data and recipe_data["steps"]:
+                st.session_state.assistant = CookingAssistant(recipe_data)
+                st.session_state.messages = []
+                st.session_state.last_voice_input = None
+                st.success(f"Loaded recipe: {recipe_data['title']}")
+            else:
+                st.error("Could not extract steps. Try a different link!")
+
+    if st.session_state.assistant:
+
+        # --- Render previous conversation
+        st.subheader("Chat History")
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
+
+        # --- RECORD VOICE BUTTON
+        if st.button("🎤 Record Your Voice"):
+            # RECORD AUDIO FROM MIC AND TRANSCRIBE
+            import speech_recognition as sr
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                with st.spinner("Listening..."):
+                    audio = r.listen(source, phrase_time_limit=5)
+                try:
+                    user_text = r.recognize_google(audio)
+                    st.success(f"You said: {user_text}")
+                    st.session_state.last_voice_input = user_text
+                except sr.UnknownValueError:
+                    st.warning("Sorry, I couldn't understand.")
+                except sr.RequestError as e:
+                    st.error(f"Error with recognition service: {e}")
+
+        # --- Process new voice input
+        if st.session_state.last_voice_input:
+            user_text = st.session_state.last_voice_input
+            st.session_state.messages.append({"role": "user", "content": user_text})
+
+            with st.spinner("ChefFlow is thinking..."):
+                assistant_reply = st.session_state.assistant.respond(user_text)
+
+            st.session_state.messages.append({"role": "assistant", "content": assistant_reply})
+
+            # --- SPEAK ASSISTANT REPLY ALOUD
+            import pyttsx3
+            engine = pyttsx3.init()
+            engine.say(assistant_reply)
+            engine.runAndWait()
+
+            st.session_state.last_voice_input = None
+
+    else:
+        st.info("Paste a recipe link in the sidebar to begin!")
