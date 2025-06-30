@@ -25,11 +25,15 @@ class CookingAssistant:
             f"Title: {self.recipe_data.get('title')}\n\n"
             f"Steps:\n{numbered_steps}\n\n"
             "Your job is to help the user cook step by step. "
-            "If they ask 'what now', 'next', or similar, give them the next step. "
-            "If they say 'repeat', repeat the last step. "
-            "If they greet you, greet them back warmly. "
-            "Be conversational, natural, and helpful."
+            "Always respond in one short, polite sentence as you would speak in real life. "
+            "Example: If they ask 'how many eggs' you respond with 'You'll need 2 eggs.' "
+            "If they ask 'what now', 'next', or similar, give them the next step in one polite sentence. "
+            "If they say 'repeat', repeat the last step in one short sentence. "
+            "If they greet you, greet them back warmly in one short sentence. "
+            "Avoid long explanations, bullet points, lists, or emojis. "
+            "Be friendly and clear, but keep it very brief."
         )
+
 
     def respond(self, user_input):
         self.history.append({"role": "user", "content": user_input})
