@@ -8,3 +8,6 @@ openai-whisper
 pyttsx3
 python-dotenv
 deepseek
+openai
+SpeechRecognition
+PyAudio
